@@ -4,12 +4,12 @@ import datetime
 
 def get_trending_repositories(top_size, exactly_days):
     repository_url = 'https://api.github.com/search/repositories'
-    period_date = (
+    date_week_ago = (
             datetime.date.today() -
-            datetime.timedelta(exactly_days)).isoformat(
-    )
+            datetime.timedelta(exactly_days)
+    ).isoformat()
     search_repositories = {
-        'q': 'created: > {}'.format(period_date),
+        'q': 'created: > {}'.format(date_week_ago),
         'sort': 'stars',
         'order': 'desc'
     }
