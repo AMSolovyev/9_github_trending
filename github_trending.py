@@ -3,25 +3,50 @@ import datetime
 
 
 def get_trending_repositories(top_size, exactly_days):
-    url = 'https://api.github.com/search/repositories'
+    repository_url = 'https://api.github.com/search/repositories'
     period_date = (
-         datetime.date.today() -
-         datetime.timedelta(exactly_days)).isoformat()
+            datetime.date.today() -
+            datetime.timedelta(exactly_days)).isoformat(
+    )
     search_repositories = {
-        'q': 'created : > {}'.format(period_date), 'sort': 'stars'
+        'q': 'created: > {}'.format(period_date),
+        'sort': 'stars',
+        'order': 'desc'
     }
-    repositories = requests.get(url, params=search_repositories).json()
-    return repositories['items'][:top_size]
+    repositories = requests.get(
+        repository_url,
+        params=search_repositories).json()
+    trend_repositories = repositories['items'][:top_size]
+    return trend_repositories
+
+
+def get_open_issues(owner, repo_name):
+    url = 'https://api.github.com/repos/{}/{}/issues'
+    open_issues = requests.get(url.format(owner, repo_name)).json()
+    return open_issues
+
+
+def printer_repositories(repo_name, html_url, issues_count):
+    print('The 20 top repositories are:')
+    print('Repository: {}'.format(repo_name))
+    print('url: {}'.format(html_url))
+    print('Issues count: {}'.format(issues_count))
+
 
 if __name__ == '__main__':
     count_of_repositiries = 20
     days = 7
     most_trending_repository = get_trending_repositories(
-        count_of_repositiries, days
+        count_of_repositiries,
+        days
     )
     for repository in most_trending_repository:
-        print('The most 20 trending_repositories are:')
-        print('Url:', repository['html_url'],
-               'Stars:', repository['stargazers_count'])
-        print('Url:', repository['html_url'],
-              'open_issues:', repository['open_issues'])
+        issues = get_open_issues(
+            repository['owner']['login'],
+            repository['name']
+        )
+        printer_repositories(
+            repository['name'],
+            repository['html_url'],
+            len(issues)
+        )
